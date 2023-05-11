@@ -14,7 +14,7 @@ def load_cookies(opts):
 
 
 def set_shortcode(opts):
-    temp = opts.url[8:]
+    temp = opts.url[8:]  # Assuming it starts with https://
     opts.shortcode = temp.split("/")[2]
 
 
