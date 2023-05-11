@@ -53,11 +53,15 @@ def main(opts):
 
     dash = data["data"]["xdt_api__v1__media__shortcode__web_info"]["items"][0]["video_dash_manifest"]
     if dash is not None:
-        with open(str(uuid4()), "w") as fd:
+        with open(str(uuid4()) + ".mpd", "w") as fd:
             fd.write(dash)
-    for item in data["data"]["xdt_api__v1__media__shortcode__web_info"]["items"][0]["carousel_media"]:
+
+    carous = data["data"]["xdt_api__v1__media__shortcode__web_info"]["items"][0]["carousel_media"]
+    if carous is None:
+        return
+    for item in carous:
         if item["video_dash_manifest"] is not None:
-            with open(str(uuid4()), "w") as fd:
+            with open(str(uuid4()) + ".mpd", "w") as fd:
                 fd.write(item["video_dash_manifest"])
 
 
