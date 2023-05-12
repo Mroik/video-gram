@@ -3,6 +3,10 @@ from requests import Session
 from argparse import ArgumentParser
 from json import loads as to_json
 from uuid import uuid4
+from html import unescape
+from re import findall
+import ffmpeg
+from os import remove
 
 
 def load_cookies(opts):
@@ -17,6 +21,31 @@ def load_cookies(opts):
 def set_shortcode(opts):
     temp = opts.url[8:]  # Assuming it starts with https://
     opts.shortcode = temp.split("/")[2]
+
+
+def find_urls(data):
+    def only_url(tag: str):
+        start = tag.find(">")
+        end = tag.find("<", start)
+        return unescape(tag[start + 1:end])
+
+    found = findall("<BaseURL .*>.*</BaseURL>", data)
+    return list(map(only_url, found))
+
+
+def generate_video(dash, sess):
+    parsed = find_urls(dash)
+    base = uuid4()
+    with open(f"temp_{base}.mp4", "wb") as fd:
+        fd.write(sess.get(parsed[0]).content)
+    with open(f"temp_{base}.mp3", "wb") as fd:
+        fd.write(sess.get(parsed[-1]).content)
+    
+    vid = ffmpeg.input(f"temp_{base}.mp4")
+    aud = ffmpeg.input(f"temp_{base}.mp3")
+    ffmpeg.output(vid, aud, f"{base}.mp4").run()
+    remove(f"temp_{base}.mp4")
+    remove(f"temp_{base}.mp3")
 
 
 def main(opts):
@@ -54,16 +83,14 @@ def main(opts):
 
     dash = data["data"]["xdt_api__v1__media__shortcode__web_info"]["items"][0]["video_dash_manifest"]
     if dash is not None:
-        with open(str(uuid4()) + ".mpd", "w") as fd:
-            fd.write(dash)
+        generate_video(dash, sess)
 
     carous = data["data"]["xdt_api__v1__media__shortcode__web_info"]["items"][0]["carousel_media"]
     if carous is None:
         return
     for item in carous:
         if item["video_dash_manifest"] is not None:
-            with open(str(uuid4()) + ".mpd", "w") as fd:
-                fd.write(item["video_dash_manifest"])
+            generate_video(item["video_dash_manifest"], sess)
 
 
 if __name__ == "__main__":
