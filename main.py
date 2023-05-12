@@ -1,3 +1,4 @@
+#!/bin/python
 from requests import Session
 from argparse import ArgumentParser
 from json import loads as to_json
@@ -42,7 +43,7 @@ def main(opts):
     }
     
     data = {
-        'fb_dtsg': 'NAcOyt0pNavIU9RHkaLXuFFSFEvvR-mbjsaIkMso6ahj1kp-HpYObsA:17864955220006059:1683609775',
+        'fb_dtsg': 'NAcPrYSUpWHkA9KixRKazAVxM8SyIp2p07m5bKB13ymUUxVXUKCF-JA:17864642926059691:1683851979',
         'fb_api_caller_class': 'RelayModern',
         'variables': '{"shortcode": "' + opts.shortcode + '"}',
         'doc_id': '6129119620513740',
